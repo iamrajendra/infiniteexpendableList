@@ -3,21 +3,25 @@ package com.gambler.infiniteexpendablelistview.libs;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
 import com.gambler.infiniteexpendablelistview.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
+public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> implements Filterable {
     private List<DataItem> mItems;
+    private List<DataItem> mItemsSearch;
 
     public DataAdapter(List<DataItem> items) {
         mItems = items;
+        mItemsSearch = items;
     }
 
     @NonNull
@@ -29,20 +33,79 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int pos) {
-        DataItem dataItem = mItems.get(pos);
+        DataItem dataItem = mItemsSearch.get(pos);
         viewHolder.post(dataItem);
 
     }
 
     @Override
     public int getItemCount() {
-        return mItems.size();
+        return mItemsSearch.size();
     }
 
     @Override
     public int getItemViewType(int position) {
         return R.layout.item;
     }
+
+    @Override
+    public Filter getFilter() {
+
+
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                String charString = charSequence.toString();
+                List<DataItem> filteredList = new ArrayList<>();
+                if (charString.isEmpty()) {
+                    mItemsSearch = mItems;
+                } else {
+                    for (DataItem item : getAllData(mItems)
+                    ) {
+
+                        if (item.getTitle().toLowerCase().trim().contains(charString.toLowerCase().trim())) {
+                            filteredList.add(item);
+                        }
+
+
+                    }
+                    mItemsSearch = filteredList;
+                }
+
+
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = mItemsSearch;
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                mItemsSearch = (ArrayList<DataItem>) filterResults.values;
+                notifyDataSetChanged();
+            }
+        }
+
+                ;
+    }
+
+    private List<DataItem> getAllData(List<DataItem> items) {
+        List<DataItem> dataItems = new ArrayList<>();
+
+        for (DataItem data :
+                items) {
+            if (data.hasChild()) {
+
+                dataItems.addAll(data.getChild());
+
+
+            }
+        }
+
+
+//        dataItems.addAll(items);
+        return dataItems;
+    }
+
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private TextView mTextView;

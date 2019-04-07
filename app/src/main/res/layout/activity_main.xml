@@ -5,7 +5,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
+    <FrameLayout
+        android:id="@+id/to"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    <include layout="@layout/toolbar"/>
+    <include layout="@layout/search_toolbar"
+        android:visibility="gone"/>
+    </FrameLayout>
     <android.support.v7.widget.RecyclerView
+        android:layout_below="@+id/to"
         android:id="@+id/data_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
